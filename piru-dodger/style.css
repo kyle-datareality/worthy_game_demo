@@ -1,0 +1,144 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%;
+  background: #05060a;
+  overflow: hidden;
+  overscroll-behavior: none;
+  position: fixed;
+  width: 100%;
+  font-family: "Courier New", monospace;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+#stage {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+#game {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
+  background: #0a0d16;
+}
+
+/* Static CRT scanline overlay */
+#stage::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.25) 0px,
+    rgba(0, 0, 0, 0.25) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* ---- Translucent dark-purple Game Boy console (sits ABOVE the scanline overlay) ---- */
+#gamepad {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  width: auto;
+  height: clamp(96px, 12vh, 116px);
+  z-index: 20;                          /* above the scanlines so they don't affect it */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px calc(8px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow: hidden;
+  isolation: isolate;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.5);
+  -webkit-user-select: none; user-select: none;
+  touch-action: none;
+  opacity: 0;                           /* hidden on the title screen */
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#gamepad.gp-on { opacity: 1; pointer-events: auto; }
+/* blurred PCB internals seen through the shell */
+.shell-pcb {
+  position: absolute; inset: -14px;
+  z-index: 0;
+  background: url("assets/pcb.png?v=1") center / cover;
+  filter: blur(3px) brightness(0.85) saturate(0.85);
+  opacity: 0.9;
+}
+/* semi-transparent dark-blue frosted plastic over the PCB */
+.shell-tint {
+  position: absolute; inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(74, 36, 120, 0.52) 0%, rgba(46, 20, 84, 0.64) 45%, rgba(22, 9, 46, 0.74) 100%);
+}
+#gamepad .dpad, #gamepad .abrow { position: relative; z-index: 2; }
+
+/* D-pad (thumb pad) — drag side to side to steer */
+.dpad {
+  position: relative;
+  width: 84px; height: 84px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.55));
+  touch-action: none;
+  cursor: pointer;
+}
+.dseg {
+  background: linear-gradient(180deg, #aeb6c6, #7b8396);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28);
+  border: none; padding: 0; margin: 0;
+  pointer-events: none;          /* the whole pad handles the drag */
+  transition: filter 0.05s;
+}
+.dpad[data-dir="left"] .left { filter: brightness(1.7); }
+.dpad[data-dir="right"] .right { filter: brightness(1.7); }
+.dseg.up    { grid-area: 1 / 2 / 2 / 3; border-radius: 9px 9px 0 0; }
+.dseg.left  { grid-area: 2 / 1 / 3 / 2; border-radius: 9px 0 0 9px; }
+.dseg.mid   { grid-area: 2 / 2 / 3 / 3; background: #88909f; }
+.dseg.right { grid-area: 2 / 3 / 3 / 4; border-radius: 0 9px 9px 0; }
+.dseg.down  { grid-area: 3 / 2 / 4 / 3; border-radius: 0 0 9px 9px; }
+.dseg.mid::after {
+  content: ""; position: absolute; inset: 0; margin: auto;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #c8cedb, #828b9d);
+}
+button.dseg { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button.dseg:active { background: linear-gradient(180deg, #2a2e36, #121419); transform: translateY(1px); }
+
+/* A / B buttons */
+.abrow { display: flex; align-items: flex-end; gap: 28px; }
+.btncol { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.btncol.a { margin-bottom: 12px; }     /* A sits higher — classic diagonal */
+.gb-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: none; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Press Start 2P", monospace; font-size: 13px; color: #ff2b2b;
+  background: radial-gradient(circle at 38% 30%, #c6cbd4 0%, #989eac 55%, #5e6573 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.5),
+    inset 0 -5px 7px rgba(0, 0, 0, 0.5),
+    0 5px 0 rgba(54, 59, 68, 0.95),
+    0 7px 9px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+}
+.gb-btn:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.5),
+    0 1px 0 #363b44,
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.gb-lbl {
+  font-family: "Press Start 2P", monospace; font-size: 8px; color: #ffffff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55); letter-spacing: 1px;
+}

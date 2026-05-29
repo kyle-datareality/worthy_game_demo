@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>WORTHY_GAME_DEMO</title>
+<meta property="og:title" content="WORTHY_GAME_DEMO" />
+<meta name="twitter:title" content="WORTHY_GAME_DEMO" />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css?v=11" />
+</head>
+<body>
+<div id="stage">
+  <canvas id="game" width="540" height="960"></canvas>
+
+  <!-- Translucent Game Boy-style console -->
+  <div id="gamepad">
+    <div class="shell-pcb"></div>
+    <div class="shell-tint"></div>
+    <div class="dpad">
+      <span class="dseg up"></span>
+      <span class="dseg left"></span>
+      <span class="dseg mid"></span>
+      <span class="dseg right"></span>
+      <span class="dseg down"></span>
+    </div>
+    <div class="abrow">
+      <div class="btncol">
+        <button class="gb-btn" data-k="shoot">B</button>
+        <span class="gb-lbl">SHOOT</span>
+      </div>
+      <div class="btncol a">
+        <button class="gb-btn" data-k="jump">A</button>
+        <span class="gb-lbl">JUMP</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="manifest.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

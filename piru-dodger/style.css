@@ -1,0 +1,137 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%;
+  background: #05060a;
+  overflow: hidden;
+  overscroll-behavior: none;
+  position: fixed;
+  width: 100%;
+  font-family: "Courier New", monospace;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+#stage {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+#game {
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 540 / 960;
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+  background: #0a0d16;
+}
+
+/* Static CRT scanline overlay */
+#stage::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.25) 0px,
+    rgba(0, 0, 0, 0.25) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* ---- Translucent dark-blue Game Boy console (sits ABOVE the scanline overlay) ---- */
+#gamepad {
+  position: fixed;
+  left: 50%; bottom: 0;
+  transform: translateX(-50%);
+  width: min(100vw, 56.25vh);          /* match the canvas width */
+  height: clamp(120px, 15vh, 166px);
+  z-index: 20;                          /* above the scanlines so they don't affect it */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px calc(8px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow: hidden;
+  isolation: isolate;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.5);
+  -webkit-user-select: none; user-select: none;
+  touch-action: none;
+}
+/* blurred PCB internals seen through the shell */
+.shell-pcb {
+  position: absolute; inset: -14px;
+  z-index: 0;
+  background: url("assets/pcb.png?v=1") center / cover;
+  filter: blur(3px) brightness(0.85) saturate(0.85);
+  opacity: 0.9;
+}
+/* semi-transparent dark-blue frosted plastic over the PCB */
+.shell-tint {
+  position: absolute; inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(70, 110, 190, 0.42) 0%, rgba(26, 48, 104, 0.55) 45%, rgba(14, 28, 70, 0.62) 100%);
+}
+#gamepad .dpad, #gamepad .abrow { position: relative; z-index: 2; }
+
+/* D-pad (thumb pad) */
+.dpad {
+  position: relative;
+  width: 110px; height: 110px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.55));
+}
+.dseg {
+  background: linear-gradient(180deg, #3b414c, #1b1f26);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.16);
+  border: none; padding: 0; margin: 0;
+}
+.dseg.up    { grid-area: 1 / 2 / 2 / 3; border-radius: 9px 9px 0 0; }
+.dseg.left  { grid-area: 2 / 1 / 3 / 2; border-radius: 9px 0 0 9px; }
+.dseg.mid   { grid-area: 2 / 2 / 3 / 3; background: #23272f; }
+.dseg.right { grid-area: 2 / 3 / 3 / 4; border-radius: 0 9px 9px 0; }
+.dseg.down  { grid-area: 3 / 2 / 4 / 3; border-radius: 0 0 9px 9px; }
+.dseg.mid::after {
+  content: ""; position: absolute; inset: 0; margin: auto;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #4c525e, #1e222a);
+}
+button.dseg { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button.dseg:active { background: linear-gradient(180deg, #2a2e36, #121419); transform: translateY(1px); }
+
+/* A / B buttons */
+.abrow { display: flex; align-items: flex-end; gap: 16px; }
+.btncol { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.btncol.a { margin-bottom: 18px; }     /* A sits higher — classic diagonal */
+.gb-btn {
+  width: 54px; height: 54px; border-radius: 50%;
+  border: none; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Press Start 2P", monospace; font-size: 16px; color: #eaf2ff;
+  background: radial-gradient(circle at 38% 30%, rgba(70, 96, 150, 0.9) 0%, rgba(34, 52, 104, 0.92) 55%, rgba(16, 26, 58, 0.95) 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(190, 215, 255, 0.4),
+    inset 0 -5px 7px rgba(0, 0, 0, 0.55),
+    0 5px 0 rgba(8, 14, 34, 0.95),
+    0 7px 9px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+}
+.gb-btn:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.5),
+    0 1px 0 #280610,
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.gb-lbl {
+  font-family: "Press Start 2P", monospace; font-size: 8px; color: #ffe2c0;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55); letter-spacing: 1px;
+}
